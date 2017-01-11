@@ -67,7 +67,8 @@ struct ReceiptValidator {
 	private func validateLocally(
 		_ receipt: AppStoreReceiptBased64EncodedString,
 		completion: (VerifyReceiptResult) -> ()) {
-		
+		//Code to validate receipt locally goes here
+
 	}
 }
 
