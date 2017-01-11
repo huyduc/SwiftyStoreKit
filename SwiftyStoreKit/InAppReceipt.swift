@@ -28,12 +28,6 @@ import Foundation
 // MARK - receipt mangement
 internal class InAppReceipt {
 
-    // URL used to verify remotely receipt
-    enum VerifyReceiptURLType: String {
-        case production = "https://buy.itunes.apple.com/verifyReceipt"
-        case sandbox = "https://sandbox.itunes.apple.com/verifyReceipt"
-    }
-
     static var appStoreReceiptUrl: URL? {
         return Bundle.main.appStoreReceiptURL
     }
