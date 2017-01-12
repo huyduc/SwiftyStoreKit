@@ -23,52 +23,79 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 
-struct ReceiptValidator {
+public struct ServerToServerValidator: ReceiptValidator {
 
-	typealias AppStoreReceiptBased64EncodedString = String
+	let url: String
 
-	enum ValidatorType {
-		case local
-		case server(String)
+	public init(url: String) {
+		self.url = url
 	}
 
-	private let validatorType: ValidatorType
+	public func vaidate(
+		receipt: String,
+		password autoRenewPassword: String?,
+		completion: @escaping (VerifyReceiptResult) -> Void) {
 
-	init(type: ValidatorType = .local) {
-		self.validatorType = type
-	}
+		// Create request
+		let validatorURL = URL(string: url)! // safe (until no more)
+		let request = NSMutableURLRequest(url: validatorURL)
+		request.httpMethod = "POST"
 
-	init(url: String) {
-		self.validatorType = .server(url)
-	}
 
-	func validate(
-		_ receipt: AppStoreReceiptBased64EncodedString,
-		completion: (VerifyReceiptResult) -> ()) {
-
-		switch validatorType {
-		case .local:
-			validateLocally(receipt, completion: completion)
-			break
-		case .server(let url):
-			validate(receipt, with: url, completion: completion)
-			break
+		let requestContents: NSMutableDictionary = [ "receipt-data" : receipt ]
+		// password if defined
+		if let password = autoRenewPassword {
+			requestContents.setValue(password, forKey: "password")
 		}
+
+		// Encore request body
+		do {
+			request.httpBody = try JSONSerialization.data(withJSONObject: requestContents, options: [])
+		} catch let e {
+			completion(.error(error: .requestBodyEncodeError(error: e)))
+			return
+		}
+
+		// Remote task
+		let task = URLSession.shared.dataTask(with: request as URLRequest) { data, response, error -> Void in
+
+			// there is an error
+			if let networkError = error {
+				completion(.error(error: .networkError(error: networkError)))
+				return
+			}
+
+			// there is no data
+			guard let safeData = data else {
+				completion(.error(error: .noRemoteData))
+				return
+			}
+
+			// cannot decode data
+			guard let receiptInfo = try? JSONSerialization.jsonObject(with: data!, options: .mutableLeaves) as? ReceiptInfo ?? [:] else {
+				let jsonStr = String(data: safeData, encoding: String.Encoding.utf8)
+				completion(.error(error: .jsonDecodeError(string: jsonStr)))
+				return
+			}
+
+			// get status from info
+			if let status = receiptInfo["status"] as? Int {
+				let receiptStatus = ReceiptStatus(rawValue: status) ?? ReceiptStatus.unknown
+				if receiptStatus.isValid {
+					completion(.success(receipt: receiptInfo))
+				}
+				else {
+					completion(.error(error: .receiptInvalid(receipt: receiptInfo, status: receiptStatus)))
+				}
+			}
+			else {
+				completion(.error(error: .receiptInvalid(receipt: receiptInfo, status: ReceiptStatus.none)))
+			}
+		}
+		task.resume()
 	}
 
-	private func validate(
-		_ receipt: AppStoreReceiptBased64EncodedString,
-		with url: String,
-		completion: (VerifyReceiptResult) -> ()) {
-
-	}
-
-	private func validateLocally(
-		_ receipt: AppStoreReceiptBased64EncodedString,
-		completion: (VerifyReceiptResult) -> ()) {
-		//Code to validate receipt locally goes here
-
-	}
 }
 
