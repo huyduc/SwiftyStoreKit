@@ -36,6 +36,10 @@ enum RegisteredPurchase : String {
     case nonRenewingPurchase = "nonRenewingPurchase"
 }
 
+enum AppleReceiptValidationEndpoints: String {
+	case production = "https://buy.itunes.apple.com/verifyReceipt"
+	case sandbox = "https://sandbox.itunes.apple.com/verifyReceipt"
+}
 
 class ViewController: UIViewController {
 
@@ -109,7 +113,8 @@ class ViewController: UIViewController {
     @IBAction func verifyReceipt() {
 
         NetworkActivityIndicatorManager.networkOperationStarted()
-		let receiptValidator = ServerToServerValidator(url: "http://carousell.com")
+		let endpoint = AppleReceiptValidationEndpoints.sandbox.rawValue
+		let receiptValidator = ServerToServerValidator(url: endpoint)
 		SwiftyStoreKit.verifyReceipt(using: receiptValidator, password: "your-shared-secret") { result in
             NetworkActivityIndicatorManager.networkOperationFinished()
 
@@ -125,8 +130,9 @@ class ViewController: UIViewController {
 
     func verifyPurchase(_ purchase: RegisteredPurchase) {
         NetworkActivityIndicatorManager.networkOperationStarted()
-		let validator = ServerToServerValidator(url: "https://sandbox.itunes.apple.com/verifyReceipt")
-		SwiftyStoreKit.verifyReceipt(using: validator, password: "your-shared-secret") { result in
+		let endpoint = AppleReceiptValidationEndpoints.sandbox.rawValue
+		let receiptValidator = ServerToServerValidator(url: endpoint)
+		SwiftyStoreKit.verifyReceipt(using: receiptValidator, password: "your-shared-secret") { result in
             NetworkActivityIndicatorManager.networkOperationFinished()
             
             switch result {
