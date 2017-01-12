@@ -52,8 +52,8 @@ internal class InAppReceipt {
      *  - Parameter session: the session used to make remote call.
      *  - Parameter completion: handler for result
      */
-    class func verify(
-        using validator: ReceiptValidator = .init(),
+	class func verify(
+        using validator: ReceiptValidator,
         password autoRenewPassword: String? = nil,
         completion: @escaping (VerifyReceiptResult) -> ()) {
 
@@ -63,7 +63,7 @@ internal class InAppReceipt {
                 return
             }
 
-			validator.validate(base64EncodedString, completion: completion)
+			validator.vaidate(receipt: base64EncodedString, password: autoRenewPassword, completion: completion)
     }
   
     /**

@@ -104,8 +104,8 @@ class ViewController: NSViewController {
     }
 
     @IBAction func verifyReceipt(_ sender: AnyObject?) {
-
-        SwiftyStoreKit.verifyReceipt(password: "your-shared-secret") { result in
+		let receiptValidator = ServerToServerValidator(url: "http://carousell.com")
+		SwiftyStoreKit.verifyReceipt(using: receiptValidator, password: "your-shared-secret") { result in
 
             self.showAlert(self.alertForVerifyReceipt(result)) { response in
 

@@ -40,8 +40,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func verifyReceipt() {
-        
-        SwiftyStoreKit.verifyReceipt(password: "your-shared-secret") { result in
+        let receiptValidator = ServerToServerValidator(url: "http://carousell.com")
+		SwiftyStoreKit.verifyReceipt(using: receiptValidator, password: "your-shared-secret") { result in
             switch result {
             case .success(let receipt):
                 print("\(receipt)")

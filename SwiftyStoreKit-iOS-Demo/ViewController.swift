@@ -109,7 +109,8 @@ class ViewController: UIViewController {
     @IBAction func verifyReceipt() {
 
         NetworkActivityIndicatorManager.networkOperationStarted()
-        SwiftyStoreKit.verifyReceipt(password: "your-shared-secret") { result in
+		let receiptValidator = ServerToServerValidator(url: "http://carousell.com")
+		SwiftyStoreKit.verifyReceipt(using: receiptValidator, password: "your-shared-secret") { result in
             NetworkActivityIndicatorManager.networkOperationFinished()
 
             self.showAlert(self.alertForVerifyReceipt(result))
@@ -123,9 +124,9 @@ class ViewController: UIViewController {
     }
 
     func verifyPurchase(_ purchase: RegisteredPurchase) {
-     
         NetworkActivityIndicatorManager.networkOperationStarted()
-        SwiftyStoreKit.verifyReceipt(password: "your-shared-secret") { result in
+		let validator = ServerToServerValidator(url: "https://sandbox.itunes.apple.com/verifyReceipt")
+		SwiftyStoreKit.verifyReceipt(using: validator, password: "your-shared-secret") { result in
             NetworkActivityIndicatorManager.networkOperationFinished()
             
             switch result {

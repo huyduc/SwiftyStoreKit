@@ -25,6 +25,8 @@
 
 import Foundation
 
+///This validator takes a String url of your receipt validation server
+///It assumes this server responds similarly to what Apple's receipt validation server do
 public struct ServerToServerValidator: ReceiptValidator {
 
 	let url: String
