@@ -33,6 +33,12 @@ public struct Product {
     public let needsFinishTransaction: Bool
 }
 
+//Conform to this protocol to provide
+//custom receipt validator
+public protocol ReceiptValidator {
+	func vaidate(receipt: String, password: String?, completion: @escaping (VerifyReceiptResult) -> Void)
+}
+
 // Payment transaction
 public protocol PaymentTransaction {
     var transactionState: SKPaymentTransactionState { get }
